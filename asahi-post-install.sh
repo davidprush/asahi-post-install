@@ -109,3 +109,8 @@ fi
 # git config --global --edit
 # git config --global user.name "davidprush"
 # git config --global user.email "davidprush@gmail.com"
+# git init
+# git config user.name "someone"
+# git config user.email "someone@someplace.com"
+# git add *
+# git commit -m "some init msg"
