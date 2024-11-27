@@ -108,7 +108,3 @@ fi
 #cat /proc/sys/kernel/core_pattern
 #nano /etc/dnf/dnf.conf
 #dnf update && sudo dnf upgrade
-
-# USB mounts
-#cd /run/media/david/
-#lsblk
