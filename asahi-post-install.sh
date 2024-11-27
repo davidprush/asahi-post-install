@@ -103,8 +103,3 @@ else
     echo "$1 is not a command. Use help to see commands."
     exit 1
 fi
-
-# Misc Stuff
-#cat /proc/sys/kernel/core_pattern
-#nano /etc/dnf/dnf.conf
-#dnf update && sudo dnf upgrade
