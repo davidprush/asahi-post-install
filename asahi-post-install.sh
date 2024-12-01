@@ -103,14 +103,3 @@ else
     echo "$1 is not a command. Use help to see commands."
     exit 1
 fi
-
-# Git and Github tips if user/author unknown
-# git config --local -e
-# git config --global --edit
-# git config --global user.name "davidprush"
-# git config --global user.email "davidprush@gmail.com"
-# git init
-# git config user.name "someone"
-# git config user.email "someone@someplace.com"
-# git add *
-# git commit -m "some init msg"
