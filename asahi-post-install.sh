@@ -32,9 +32,36 @@ export_apps() {
         echo "  Saving user-installed apps to $filename"
         save_app_file "$filename"
     else
-        help
+        echo "Missing [ filename ], use command [ --help ] to see command format."
         exit 1
     fi
+    exit 0
+}
+
+import_apps() {
+    file="$1"
+    if [ -n "$file" ]; then
+        apps=$(cat $file)
+        for app in apps; do
+            sudo dnf install -y $app
+        done
+        exit 0
+    else
+        echo "Missing [ filename ], use command [ --help ] to see command format."
+        exit 1
+    fi
+}
+
+backup_user_home() {
+    user=$(whoami)
+    home="/home/$user"
+    echo "  Saving backup path $(pwd) for user: $user..."
+    tar -zcvpf "$user-home-backup-$(date +%d-%m-%Y).tar.gz" "$home"
+    exit 0
+}
+
+restore_user_home() {
+
 }
 
 clean_dnf() {
@@ -158,14 +185,12 @@ help() {
     echo "  installing standard applications and repos, "
     echo "  importing and exporting user settings and data, "
     echo "  and backing up the user's home directory, etc."
+    echo
     echo "Syntax: asahi-post-install [command]"
-    echo "commands:"
+    echo "Commands:"
     echo "--export-apps [filename]           Export user-installed to text file [filename].txt"
     echo "--import-apps [filename]           Import apps and istall from text file [filename].txt"
-    echo "--install-apps [filename]          Install a standard set of apps"
-    echo "--export-user [filename]           Export user data and configs from home directory"
-    echo "--import-user [filename]           Import user data and configs from home directory"
-    echo "--backup-user-home [filename]      Backup user home directory as a compressed file"
+    echo "--backup-user-home                 Backup user home directory as a compressed file"
     echo "--restore-user-home [filename]     Restore user home directory from a compressed file"
     echo "--save-kde-settings [filename]     Use konsave to backup KDE system settings"
     echo "--restore-kde-settings [filename]  Restore KDE system settings from a konsave file"
@@ -177,18 +202,11 @@ help() {
 }
 
 main() {
-    check_sudo
+    #check_sudo
 
     command="$1"
     filename="$2"
 
-    # if [ $# -eq 0 ]; then
-    #     echo "No command supplied. Use help to see commands."
-    #     exit 1
-    # else
-    #     echo "$1 is not a command. Use help to see commands."
-    #     exit 1
-    # fi
     case $command in
 
     --export-apps)
@@ -199,20 +217,8 @@ main() {
         import_apps "$filename"
         ;;
 
-    --install-apps)
-        install_apps "$filename"
-        ;;
-
-    --export-user)
-        export_user "$filename"
-        ;;
-
-    --import-user)
-        import_user "$filename"
-        ;;
-
     --backup-user-home)
-        backup_user_home "$filename"
+        backup_user_home
         ;;
 
     --restore-user-home)
