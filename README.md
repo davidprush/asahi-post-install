@@ -14,3 +14,4 @@
 8. Option to use konsave file to restore KDE settings
 9. Option to configure system swappiness
 10. Option to install codecs/plugins for multimedia
+
