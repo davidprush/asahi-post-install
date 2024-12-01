@@ -5,16 +5,31 @@ readonly SCRIPT_VERSION="version 0.0.1-12.1.2024
 "
 check_sudo() {
     if [[ $EUID -ne 0 ]]; then
-        echo "!!!This script must be run as root or with sudo!!!"
+        echo "Verified not sudo..."
+    else
+        echo "WARNING: Do not run this script as root or with sudo."
         exit 1
     fi
 }
 
+add_repos() {
+    sudo dnf install https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm
+    sudo dnf install https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm
+    sudo dnf group update core
+    sudo rpm --import https://packages.microsoft.com/keys/microsoft.asc
+    sudo echo -e "[code]\nname=Visual Studio Code\nbaseurl=https://packages.microsoft.com/yumrepos/vscode\nenabled=1\ngpgcheck=1\ngpgkey=https://packages.microsoft.com/keys/microsoft.asc" | sudo tee /etc/yum.repos.d/vscode.repo >/dev/null
+    sudo dnf check-update
+    sudo dnf config-manager --add-repo https://brave-browser-rpm-release.s3.brave.com/brave-browser.repo
+    sudo rpm --import https://brave-browser-rpm-release.s3.brave.com/brave-core.asc
+    sudo dnf update -y
+    sudo dnf install -y code brave-browser vlc
+}
+
 install_apps() {
     if [ "$1" == "essential" ]; then
-        dnf update && dnf upgrade
-        dnf install dnf-plugins-core
-        dnf install inxi gpg nano bpytop glances htop yt-dlp curl chromium neofetch python pip git
+        sudo dnf update && dnf upgrade
+        sudo dnf install dnf-plugins-core
+        sudo dnf install inxi gpg nano bpytop glances htop yt-dlp curl chromium neofetch python pip git
         exit 0
     fi
 }
@@ -61,42 +76,30 @@ backup_user_home() {
 }
 
 restore_user_home() {
-
+    
 }
 
-clean_dnf() {
-    if [ "$1" == "clean" ]; then
-        dnf update && dnf upgrade
-        dnf clean all && dnf autoremove
-        exit 0
-    fi
-}
-
-change_swappiness() {
+set_swappiness() {
     if [ "$1" == "swappiness" ]; then
         echo "Current swappiness:"
         cat /proc/sys/vm/swappiness # get and display current swappiness
-        sysctl vm.swappiness=90     # Change current val (0-low swapping, 100-high swapping) resets after reboot
+        echo -n "Enter new swappiness (0-100; 0-none, 100-high):"
+        read swappiness 
+        ssudo ysctl vm.swappiness="$swappiness"     # Change current val (0-low swapping, 100-high swapping) resets after reboot
         nano /etc/sysctl.conf       # edit/append line (90 works well with MacBook Air 8GB/16GB Swap): vm.swappiness=90
-        echo "vm.swappiness=90" >>/etc/sysctl.conf
+        sudo echo "vm.swappiness=$swappiness" >>/etc/sysctl.conf
         exit 0
     fi
 }
 
 recreate_swap() {
-    if [ "$1" == "swap" ]; then
+    if [ -n "$1" ]; then
+        echo -n "Enter new swap size (8-32):"
+        read swap 
         cat /proc/swaps #verify current swaps
-        dnf update --refresh
+        sudo dnf update --refresh
         sudo /usr/libexec/fedora-asahi-remix-scripts/setup-swap.sh --recreate 16G
-        cat /proc/swaps #verify change
-        exit 0
-    fi
-}
-
-install_widevine() {
-    if [ "$1" == "widevine" ]; then
-        dnf install widevine-installer
-        sudo widevine-installer
+        sudo cat /proc/swaps #verify change
         exit 0
     fi
 }
@@ -104,40 +107,17 @@ install_widevine() {
 install_codecs() {
     if [ "$1" == "codecs" ]; then
         # Multimedia codec installation
-        dnf install https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm
-        dnf install https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm
-        dnf group update core
-        dnf config-manager --enable fedora-cisco-openh264
-        dnf update && dnf upgrade
-        dnf clean all && dnf autoremove
-        dnf install vlc
-        dnf install gstreamer1-plugins-{bad-\*,good-\*,base} gstreamer1-plugin-openh264 gstreamer1-libav --exclude=gstreamer1-plugins-bad-free-devel
-        dnf install lame\* --exclude=lame-devel
-        dnf group upgrade --with-optional Multimedia
-        dnf install libavcodec-freeworld
-        dnf install dnf-plugins-core
-        dnf update && dnf upgrade
-        exit 0
-    fi
-}
-
-install_vscode() {
-    if [ "$1" == "vscode" ]; then
-        # Install VS Code repos and app
-        rpm --import https://packages.microsoft.com/keys/microsoft.asc
-        echo -e "[code]\nname=Visual Studio Code\nbaseurl=https://packages.microsoft.com/yumrepos/vscode\nenabled=1\ngpgcheck=1\ngpgkey=https://packages.microsoft.com/keys/microsoft.asc" | sudo tee /etc/yum.repos.d/vscode.repo >/dev/null
-        dnf check-update
-        dnf install code # or code-insiders
-        exit 0
-    fi
-}
-
-install_brave() {
-    if [ "$1" == "brave" ]; then
-        # Install Brave Browser
-        dnf config-manager --add-repo https://brave-browser-rpm-release.s3.brave.com/brave-browser.repo
-        rpm --import https://brave-browser-rpm-release.s3.brave.com/brave-core.asc
-        dnf install brave-browser
+        add_repos
+        sudo dnf install widevine-installer
+        sudo widevine-installer
+        sudo dnf config-manager --enable fedora-cisco-openh264
+        sudo dnf install gstreamer1-plugins-{bad-\*,good-\*,base} gstreamer1-plugin-openh264 gstreamer1-libav --exclude=gstreamer1-plugins-bad-free-devel
+        sudo dnf install lame\* --exclude=lame-devel
+        sudo dnf group upgrade --with-optional Multimedia
+        sudo dnf install libavcodec-freeworld
+        sudo dnf install dnf-plugins-core
+        sudo dnf update -y && dnf upgrade -y
+        sudo dnf clean all && dnf autoremove
         exit 0
     fi
 }
@@ -188,6 +168,7 @@ help() {
     echo
     echo "Syntax: asahi-post-install [command]"
     echo "Commands:"
+    echo "--add-repos                        Add repos: rpmfusion, vscod, brave-browser"
     echo "--export-apps [filename]           Export user-installed to text file [filename].txt"
     echo "--import-apps [filename]           Import apps and istall from text file [filename].txt"
     echo "--backup-user-home                 Backup user home directory as a compressed file"
@@ -202,12 +183,17 @@ help() {
 }
 
 main() {
-    #check_sudo
+    check_sudo
 
     command="$1"
     filename="$2"
 
     case $command in
+
+
+    --add-repos)
+        add_repos
+        ;;
 
     --export-apps)
         export_apps "$filename"
