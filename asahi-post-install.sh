@@ -5,7 +5,7 @@ readonly SCRIPT_VERSION="version 0.0.1-12.1.2024
 "
 check_sudo() {
     if [[ $EUID -ne 0 ]]; then
-        echo "Verified not sudo..."
+        echo "Verified not root or sudo..."
     else
         echo "WARNING: Do not run this script as root or with sudo."
         exit 1
@@ -35,6 +35,7 @@ install_apps() {
 }
 
 save_app_file() {
+    sudo dnf update -y && sudo dnf upgrade -y
     echo $(sudo dnf repoquery --userinstalled) >$1
 }
 
@@ -57,6 +58,7 @@ import_apps() {
     file="$1"
     if [ -n "$file" ]; then
         apps=$(cat $file)
+        sudo dnf update -y && sudo dnf upgrade -y
         for app in apps; do
             sudo dnf install -y $app
         done
@@ -76,7 +78,8 @@ backup_user_home() {
 }
 
 restore_user_home() {
-    
+    user=$(whoami)
+    home="/home/$user"
 }
 
 set_swappiness() {
@@ -122,11 +125,10 @@ install_codecs() {
     fi
 }
 
-konsave() {
+install_konsave() {
     if [ "$1" == "konsave" ]; then
         # konsave commands for saving or restoring Plasma desktop settings
         python -m pip install konsave
-        konsave -h
     fi
 }
 
@@ -161,11 +163,8 @@ script_version() {
 
 help() {
     # Display Help
-    echo "This script helps users post Asahi Linux installation,"
-    echo "  installing standard applications and repos, "
-    echo "  importing and exporting user settings and data, "
-    echo "  and backing up the user's home directory, etc."
-    echo
+    echo "This script helps users post Asahi Linux installation, installing standard applications and repos,"
+    echo "  importing and exporting user settings and data, and backing up the user's home directory, etc."
     echo "Syntax: asahi-post-install [command]"
     echo "Commands:"
     echo "--add-repos                        Add repos: rpmfusion, vscod, brave-browser"
