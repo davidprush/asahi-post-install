@@ -5,8 +5,8 @@ readonly SCRIPT_VERSION="version 0.0.1-12.1.2024
 "
 check_sudo() {
     if [[ $EUID -ne 0 ]]; then
-       echo "!!!This script must be run as root or with sudo!!!"
-       exit 1
+        echo "!!!This script must be run as root or with sudo!!!"
+        exit 1
     fi
 }
 
@@ -19,21 +19,22 @@ install_apps() {
     fi
 }
 
-save_app_file(){
-    echo $(sudo dnf repoquery --userinstalled) > $1
+save_app_file() {
+    echo $(sudo dnf repoquery --userinstalled) >$1
 }
 
-export_apps(){
-    filename="$1"
-    if [ ! "$filename" -eq 0 ]; then
-        if [[ "${filename: -4}" != ".txt" ]]; then
-            $filename="$filename.txt"
+export_apps() {
+    file="$1"
+    if [ -n "$file" ]; then
+        if [ -z $(echo "$file" | awk /.txt/) ]; then
+            file+=".txt"
         fi
         echo "  Saving user-installed apps to $filename"
-        save_app_file $filename
+        save_app_file "$filename"
     else
         help
         exit 1
+    fi
 }
 
 clean_dnf() {
@@ -191,39 +192,39 @@ main() {
     case $command in
 
     --export-apps)
-        export_apps $filename
+        export_apps "$filename"
         ;;
 
     --import-apps)
-        import_apps $filename
+        import_apps "$filename"
         ;;
 
     --install-apps)
-        install_apps $filename
+        install_apps "$filename"
         ;;
 
     --export-user)
-        export_user $filename
+        export_user "$filename"
         ;;
 
     --import-user)
-        import_user $filename
+        import_user "$filename"
         ;;
 
     --backup-user-home)
-        backup_user_home $filename
+        backup_user_home "$filename"
         ;;
 
     --restore-user-home)
-        restore_user_home $filename
+        restore_user_home "$filename"
         ;;
 
     --save-kde-settings)
-        save_kde_settins $filename
+        save_kde_settins "$filename"
         ;;
 
     --restore-kde-settings)
-        restore_kde_settings $filename
+        restore_kde_settings "$filename"
         ;;
 
     --set-swappiness)
@@ -249,4 +250,4 @@ main() {
     esac
 }
 
-main $1 $2
+main "$1" "$2"
