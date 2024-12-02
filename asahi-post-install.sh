@@ -78,8 +78,54 @@ backup_user_home() {
 }
 
 restore_user_home() {
-    user=$(whoami)
-    home="/home/$user"
+    # Assign the filename to a variable
+    backup_file="$1"
+
+    # Check if the backup file exists
+    if [ ! -f "$backup_file" ]; then
+        echo "Error: Backup file $backup_file does not exist."
+        return 1
+    fi
+
+    # Determine the file extension to handle different compression formats
+    case "$backup_file" in
+        *.tar.gz|*.tgz)
+            decompress_cmd="tar xzf"
+            ;;
+        *.tar.bz2)
+            decompress_cmd="tar xjf"
+            ;;
+        *.tar.xz)
+            decompress_cmd="tar xJf"
+            ;;
+        *)
+            echo "Unsupported file format. This function only supports .tar.gz, .tgz, .tar.bz2, and .tar.xz."
+            return 1
+            ;;
+    esac
+
+    # Prompt for confirmation to prevent accidental data loss
+    read -p "This will restore your home directory. Are you sure? (y/n) " -n 1 -r
+    echo
+    if [[ $REPLY =~ ^[Yy]$ ]]
+    then
+        # Move current home directory contents to a temporary location
+        mv ~ ~/backup_temp_$RANDOM
+
+        # Extract the backup
+        $decompress_cmd "$backup_file" -C ~
+
+        # Check if extraction was successful
+        if [ $? -eq 0 ]; then
+            echo "Restore completed. Your old home directory is temporarily at ~/backup_temp_$RANDOM"
+        else
+            echo "Restore failed."
+            # Attempt to move the backup back if restore failed
+            mv ~/backup_temp_$RANDOM ~ || echo "Failed to restore the original home directory."
+        fi
+    else
+        echo "Restore operation cancelled."
+    fi
 }
 
 set_swappiness() {
