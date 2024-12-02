@@ -213,7 +213,7 @@ help() {
     echo "  importing and exporting user settings and data, and backing up the user's home directory, etc."
     echo "Syntax: asahi-post-install [command]"
     echo "Commands:"
-    echo "--add-repos                        Add repos: rpmfusion, vscod, brave-browser"
+    echo "--add-repos                        Add repos: rpmfusion, vscode, brave-browser"
     echo "--export-apps [filename]           Export user-installed to text file [filename].txt"
     echo "--import-apps [filename]           Import apps and istall from text file [filename].txt"
     echo "--backup-user-home                 Backup user home directory as a compressed file"
