@@ -179,6 +179,7 @@ install_konsave() {
 }
 
 mit_license() {
+    echo
     echo "MIT License
 
     Copyright (c) 2024 David P. Rush
@@ -222,6 +223,7 @@ help() {
     echo "--restore-kde-settings [filename]  Restore KDE system settings from a konsave file"
     echo "--set-swappiness                   Change system swappiness"
     echo "--install-codecs                   Install codecs for multimedia"
+    echo "--license                          Display script license"
     echo "--version                          Display script version"
     echo "--help                             Display this Help"
     echo
@@ -269,6 +271,11 @@ main() {
 
     --install-codecs)
         install_codecs
+        ;;
+
+    --license)
+        mit_license
+        exit 0
         ;;
 
     --version)
