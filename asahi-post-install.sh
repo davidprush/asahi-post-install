@@ -279,7 +279,7 @@ main() {
         ;;
 
     --version)
-        echo -n "$0 Version: $SCRIPT_VERSION"
+        echo -n "$0 $SCRIPT_VERSION"
         exit 0
         ;;
 
