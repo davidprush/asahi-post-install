@@ -5,7 +5,7 @@ readonly SCRIPT_VERSION="version 0.0.1-12.1.2024
 "
 check_sudo() {
     if [[ $EUID -ne 0 ]]; then
-        echo "Verified not root or sudo..."
+        echo
     else
         echo "WARNING: Do not run this script as root or with sudo."
         exit 1
