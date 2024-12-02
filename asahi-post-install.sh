@@ -34,6 +34,40 @@ install_apps() {
     fi
 }
 
+install_warp() {
+    # Define the download URL for WARP RPM (ARM64)
+    WARP_RPM_URL="https://app.warp.dev/get_warp?package=rpm_arm64"
+    WARP_RPM_FILE="cloudflare-warp-latest-aarch64.rpm"
+
+    # Set temporary directory for downloaded file
+    TEMP_DIR="/tmp"
+    TEMP_FILE="${TEMP_DIR}/${WARP_RPM_FILE}"
+
+    echo "Downloading WARP RPM for ARM64..."
+    
+    # Download the RPM file
+    if ! curl -L -o "$TEMP_FILE" "$WARP_RPM_URL/$WARP_RPM_FILE"; then
+        echo "Failed to download WARP RPM. Please check the URL or your internet connection."
+        return 1
+    fi
+
+    echo "File downloaded to: $TEMP_FILE"
+
+    # Install the RPM using dnf
+    echo "Attempting to install WARP..."
+    if sudo dnf install -y "$TEMP_FILE"; then
+        echo "WARP has been successfully installed."
+    else
+        echo "Installation failed. Please check the package or try running with elevated privileges."
+        return 1
+    fi
+
+    # Clean up: Remove the downloaded RPM file
+    rm -f "$TEMP_FILE"
+    echo "Temporary file removed."
+
+}
+
 save_app_file() {
     sudo dnf update -y && sudo dnf upgrade -y
     echo $(sudo dnf repoquery --userinstalled) >$1
@@ -217,6 +251,7 @@ help() {
     echo "--add-repos                        Add repos: rpmfusion, vscode, brave-browser"
     echo "--export-apps [filename]           Export user-installed to text file [filename].txt"
     echo "--import-apps [filename]           Import apps and istall from text file [filename].txt"
+    echo "--install-warp                     Install the warp terminal"
     echo "--backup-user-home                 Backup user home directory as a compressed file"
     echo "--restore-user-home [filename]     Restore user home directory from a compressed file"
     echo "--save-kde-settings [filename]     Use konsave to backup KDE system settings"
@@ -247,6 +282,10 @@ main() {
 
     --import-apps)
         import_apps "$filename"
+        ;;
+
+    --install-warp)
+        install_warp
         ;;
 
     --backup-user-home)
