@@ -246,7 +246,7 @@ help() {
     # Display Help
     echo "This script helps users post Asahi Linux installation, installing standard applications and repos,"
     echo "  importing and exporting user settings and data, and backing up the user's home directory, etc."
-    echo "Syntax: asahi-post-install [command]"
+    echo "Syntax: AsahiPostInstall [command]"
     echo "Commands:"
     echo "--add-repos                        Add repos: rpmfusion, vscode, brave-browser"
     echo "--export-apps [filename]           Export user-installed to text file [filename].txt"
