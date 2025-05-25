@@ -1,13 +1,13 @@
-# asahi-post-install.sh
+# AsahiPostInstall.sh
 
-`asahi-post-install.sh` is a script with many options to configure post installation of Asahi Linux on Apple Silicon.
+`AsahiPostInstall.sh` is a script with many options to configure post installation of Asahi Linux on Apple Silicon.
 
 ## Script functions:
 
 ``` bash
 This script helps users post Asahi Linux installation, installing standard applications and repos,
   importing and exporting user settings and data, and backing up the user's home directory, etc.
-Syntax: asahi-post-install [command]
+Syntax: AsahiPostInstall [command]
 Commands:
 --add-repos                        Add repos: rpmfusion, vscode, brave-browser
 --export-apps [filename]           Export user-installed to text file [filename].txt
